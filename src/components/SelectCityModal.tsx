@@ -70,8 +70,8 @@ const SelectCityModal = ({visible, onClose, title, onSelect}: any) => {
           </View>
           <FlatList
             contentContainerStyle={{marginHorizontal: '7%'}}
-            data={['Delhi', 'Banglore', 'Chennai', ''].filter(item =>
-              item.toLowerCase().includes(searchValue.toLowerCase()),
+            data={['Delhi', 'Mumbai', 'Chennai', 'Bangalore', 'Kolkata'].filter(
+              item => item.toLowerCase().includes(searchValue.toLowerCase()),
             )}
             renderItem={({item}) => (
               <TouchableOpacity

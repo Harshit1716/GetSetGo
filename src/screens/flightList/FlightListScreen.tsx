@@ -11,11 +11,13 @@ import {COLORS, FONTS, SIZES} from '../../resources';
 import ListHeader from '../../components/ListHeader';
 import URLManager from '../../networkLayer/URLManager';
 
-const FlightListScreen = (props: any) => {
+const FlightListScreen = ({route}: any) => {
+  console.log(route?.params);
   const [flightData, setFlightData] = useState<any[]>([]);
+  const [filteredFlightData, setFilteredFlightData] = useState<any[]>([]);
   useEffect(() => {
     fetchFlightData();
-  }, []);
+  }, [route.params]);
 
   const fetchFlightData = async () => {
     try {
@@ -27,7 +29,14 @@ const FlightListScreen = (props: any) => {
         })
         .then(res => {
           if (res) {
-            setFlightData(res);
+            let ar = [...res];
+            ar = ar.filter(
+              item =>
+                item.origin == route.params.origin &&
+                item.destination == route.params?.destination,
+            );
+            setFlightData(ar);
+            setFilteredFlightData(ar);
           }
         })
         .catch(e => {
@@ -39,15 +48,16 @@ const FlightListScreen = (props: any) => {
       Alert.alert('Error');
     }
   };
-  const handleBackPress = () => {
-    props?.navigation.goBack();
-  };
+
   return (
     <View style={styles.container}>
-      <ListHeader handleBackPress={() => {}} />
+      <ListHeader
+        origin={route.params.origin}
+        destination={route.params.destination}
+      />
       <FlatList
         contentContainerStyle={{marginVertical: '10%'}}
-        data={flightData}
+        data={filteredFlightData}
         showsVerticalScrollIndicator={false}
         ListFooterComponent={() => (
           <View style={{height: 100, width: 1}}></View>
@@ -151,6 +161,34 @@ const FlightListScreen = (props: any) => {
           </TouchableOpacity>
         )}
       />
+      <View
+        style={{
+          position: 'absolute',
+          backgroundColor: COLORS.secondary,
+          flexDirection: 'row',
+          padding: '2%',
+          justifyContent: 'center',
+          alignItems: 'center',
+          bottom: '5%',
+          borderRadius: 10,
+          alignSelf: 'center',
+          borderWidth: 1,
+          borderColor: COLORS.gray,
+        }}>
+        <TouchableOpacity>
+          <Text style={styles.descText1}>SORT</Text>
+        </TouchableOpacity>
+        <View
+          style={{
+            height: '100%',
+            width: 1,
+            backgroundColor: COLORS.white,
+            marginHorizontal: 10,
+          }}></View>
+        <TouchableOpacity>
+          <Text style={styles.descText1}>FILTER</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 };
@@ -164,6 +202,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: '5%',
   },
   appText: {color: COLORS.white, ...FONTS.h1, fontWeight: '600'},
+  descText1: {color: COLORS.lightGray, ...FONTS.body4, fontWeight: '600'},
   descText: {color: COLORS.lightGray, ...FONTS.body5},
   textContainer: {
     alignItems: 'center',

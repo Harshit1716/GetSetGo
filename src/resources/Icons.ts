@@ -6,6 +6,8 @@ const CHECKED_ICON = require('../assets/checked.png');
 const UNCHECKED_ICON = require('../assets/unCheck.png');
 const CROSS_ICON = require('../assets/close.png');
 const SEARCH_ICON = require('../assets/search.png');
+const BACK_ICON = require('../assets/back.png');
+const FILTER_ICON = require('../assets/filter.png');
 
 export {
   SEARCH_ICON,
@@ -16,4 +18,6 @@ export {
   CHECKED_ICON,
   UNCHECKED_ICON,
   CROSS_ICON,
+  BACK_ICON,
+  FILTER_ICON,
 };

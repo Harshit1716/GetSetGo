@@ -1,14 +1,15 @@
 import {Image, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
-import React from 'react';
+import React, {useEffect} from 'react';
 import {COLORS, ICONS, FONTS} from '../resources';
 import {useNavigation} from '@react-navigation/native';
 
 const ListHeader = (props: any) => {
   const navigation = useNavigation();
+
   return (
     <View style={styles.container}>
       <TouchableOpacity onPress={() => navigation.goBack()}>
-        <Image style={styles.profileImage} source={ICONS.CROSS_ICON} />
+        <Image style={styles.profileImage} source={ICONS.BACK_ICON} />
       </TouchableOpacity>
       <View
         style={{
@@ -17,9 +18,16 @@ const ListHeader = (props: any) => {
           alignItems: 'center',
         }}>
         <Text style={styles.descText}>Search Result</Text>
-        <Text style={styles.appText}>Banglore To Delhi</Text>
+        <Text style={styles.appText}>
+          {props?.origin} To {props?.destination}
+        </Text>
       </View>
-      <Image style={styles.profileImage} source={ICONS.CROSS_ICON} />
+      <TouchableOpacity>
+        {/* <Image
+          style={{tintColor: COLORS.white, ...styles.profileImage}}
+          source={ICONS.FILTER_ICON}
+        /> */}
+      </TouchableOpacity>
     </View>
   );
 };

@@ -1,4 +1,5 @@
 import {
+  Alert,
   Image,
   ScrollView,
   StyleSheet,
@@ -19,6 +20,28 @@ const HomeScreen = ({navigation}: any) => {
   const [currentSelected, setCurrentSelected] = useState<
     'origin' | 'destination'
   >('origin');
+
+  const validate = () => {
+    if (!origin) {
+      Alert.alert('Please select origin');
+      return false;
+    }
+    if (!destination) {
+      Alert.alert('Please select destination');
+      return false;
+    }
+    if (origin == destination) {
+      Alert.alert("Origin and Destination can't be same");
+      return false;
+    }
+    return true;
+  };
+  const handleSearchFlight = () => {
+    const res = validate();
+    if (res) {
+      navigation.navigate('FlightList', {origin, destination});
+    }
+  };
   return (
     <View style={styles.container}>
       <HomeHeader />
@@ -154,9 +177,7 @@ const HomeScreen = ({navigation}: any) => {
           </View>
         </View>
         <TouchableOpacity
-          onPress={() => {
-            navigation.navigate('FlightList');
-          }}
+          onPress={handleSearchFlight}
           style={{
             backgroundColor: COLORS.secondary,
             paddingVertical: '3%',
