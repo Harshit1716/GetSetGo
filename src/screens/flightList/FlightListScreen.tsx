@@ -1,20 +1,51 @@
 import {
   Alert,
   FlatList,
+  Image,
+  Modal,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from 'react-native';
 import React, {useEffect, useState} from 'react';
-import {COLORS, FONTS, SIZES} from '../../resources';
+import {COLORS, FONTS, ICONS, SIZES} from '../../resources';
 import ListHeader from '../../components/ListHeader';
 import URLManager from '../../networkLayer/URLManager';
 
 const FlightListScreen = ({route}: any) => {
-  console.log(route?.params);
   const [flightData, setFlightData] = useState<any[]>([]);
   const [filteredFlightData, setFilteredFlightData] = useState<any[]>([]);
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [allAirlines, setAllAirLines] = useState<string[]>([]);
+  const [selectedAirlines, setSelectedAirlines] = useState<string[]>([]);
+  const [sortType, setSortType] = useState(false);
+  const toggleModal = () => {
+    setIsModalVisible(!isModalVisible);
+  };
+
+  const applyFiltersAndSort = () => {
+    let filteredData = [...flightData];
+
+    if (sortType) {
+      filteredData = filteredData.sort((a, b) => a.price - b.price);
+    }
+    // Apply filters
+    if (selectedAirlines.length > 0) {
+      filteredData = filteredData.filter(item =>
+        selectedAirlines.includes(item.airline),
+      );
+    }
+
+    setFilteredFlightData(filteredData);
+    setIsModalVisible(false);
+  };
+  const handleClearFilter = () => {
+    setFilteredFlightData(flightData);
+    setSortType(false);
+    setSelectedAirlines([]);
+    setIsModalVisible(false);
+  };
   useEffect(() => {
     fetchFlightData();
   }, [route.params]);
@@ -29,12 +60,20 @@ const FlightListScreen = ({route}: any) => {
         })
         .then(res => {
           if (res) {
+            let airLineArray: string[] | any[] = [];
             let ar = [...res];
             ar = ar.filter(
               item =>
                 item.origin == route.params.origin &&
                 item.destination == route.params?.destination,
             );
+            ar.map(item => {
+              if (!airLineArray.includes(item.airline)) {
+                airLineArray.push(item.airline);
+              }
+            });
+            console.log(airLineArray);
+            setAllAirLines(airLineArray);
             setFlightData(ar);
             setFilteredFlightData(ar);
           }
@@ -175,20 +214,149 @@ const FlightListScreen = ({route}: any) => {
           borderWidth: 1,
           borderColor: COLORS.gray,
         }}>
-        <TouchableOpacity>
+        <TouchableOpacity onPress={toggleModal} style={{flexDirection: 'row'}}>
           <Text style={styles.descText1}>SORT</Text>
-        </TouchableOpacity>
-        <View
-          style={{
-            height: '100%',
-            width: 1,
-            backgroundColor: COLORS.white,
-            marginHorizontal: 10,
-          }}></View>
-        <TouchableOpacity>
+          <View
+            style={{
+              height: 25,
+              width: 1,
+              backgroundColor: COLORS.white,
+              marginHorizontal: 10,
+            }}></View>
+
           <Text style={styles.descText1}>FILTER</Text>
         </TouchableOpacity>
       </View>
+      <Modal
+        visible={isModalVisible}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={toggleModal}>
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <View
+              style={{
+                width: '100%',
+                borderBottomWidth: 1,
+                borderColor: COLORS.lightGray,
+                paddingHorizontal: '5%',
+                paddingVertical: '2%',
+                flexDirection: 'row',
+              }}>
+              <Text style={styles.appText}>Filter Data</Text>
+              <TouchableOpacity
+                onPress={() => {
+                  setIsModalVisible(false);
+                }}
+                style={{marginLeft: '5%'}}>
+                <Image
+                  resizeMode="contain"
+                  style={{height: 40, width: 40}}
+                  source={ICONS.CROSS_ICON}
+                />
+              </TouchableOpacity>
+            </View>
+            <TouchableOpacity
+              onPress={() => {
+                setSortType(!sortType);
+              }}
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                marginVertical: '2%',
+              }}>
+              <Image
+                resizeMode="contain"
+                style={{marginLeft: '5%', height: 30, width: 30}}
+                source={sortType ? ICONS.CHECKED_ICON : ICONS.UNCHECKED_ICON}
+              />
+              <Text style={{...styles.appText, marginLeft: '2%'}}>
+                Sort by Price
+              </Text>
+            </TouchableOpacity>
+            <FlatList
+              ListHeaderComponent={() => (
+                <Text style={{marginLeft: '5%', ...styles.appText}}>
+                  Filter by Airlines
+                </Text>
+              )}
+              data={[...allAirlines]}
+              renderItem={({item}: any) => {
+                return (
+                  <TouchableOpacity
+                    onPress={() => {
+                      let ar = [...selectedAirlines];
+                      if (selectedAirlines.includes(item)) {
+                        ar = ar.filter(element => element != item);
+                      } else {
+                        ar.push(item);
+                      }
+                      setSelectedAirlines(ar);
+                    }}
+                    style={{
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      marginVertical: '2%',
+                    }}>
+                    <Image
+                      resizeMode="contain"
+                      style={{marginLeft: '5%', height: 30, width: 30}}
+                      source={
+                        selectedAirlines.includes(item)
+                          ? ICONS.CHECKED_ICON
+                          : ICONS.UNCHECKED_ICON
+                      }
+                    />
+                    <Text style={{...styles.appText, marginLeft: '2%'}}>
+                      {item}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              }}></FlatList>
+            <View
+              style={{
+                width: '60%',
+                position: 'absolute',
+                backgroundColor: COLORS.secondary,
+                flexDirection: 'row',
+                padding: '2%',
+                justifyContent: 'center',
+                alignItems: 'center',
+                bottom: '5%',
+                borderRadius: 10,
+                alignSelf: 'center',
+                borderWidth: 1,
+                borderColor: COLORS.gray,
+              }}>
+              <TouchableOpacity
+                style={{
+                  flex: 1,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+                onPress={applyFiltersAndSort}>
+                <Text style={styles.appText}>Apply</Text>
+              </TouchableOpacity>
+              <View
+                style={{
+                  height: '100%',
+                  width: 1,
+                  backgroundColor: COLORS.white,
+                  marginHorizontal: 10,
+                }}></View>
+              <TouchableOpacity
+                onPress={handleClearFilter}
+                style={{
+                  flex: 1,
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}>
+                <Text style={styles.appText}>Clear</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 };
@@ -201,7 +369,7 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.primary,
     paddingHorizontal: '5%',
   },
-  appText: {color: COLORS.white, ...FONTS.h1, fontWeight: '600'},
+  appText: {color: COLORS.white, ...FONTS.h1, fontWeight: '600', flex: 1},
   descText1: {color: COLORS.lightGray, ...FONTS.body4, fontWeight: '600'},
   descText: {color: COLORS.lightGray, ...FONTS.body5},
   textContainer: {
@@ -221,5 +389,19 @@ const styles = StyleSheet.create({
     width: 40,
     alignSelf: 'center',
     flex: 1,
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalContent: {
+    backgroundColor: COLORS.primary,
+    height: '80%',
+    bottom: 0,
+    position: 'absolute',
+    width: '100%',
+    borderRadius: 10,
   },
 });
