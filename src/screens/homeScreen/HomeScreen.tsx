@@ -11,10 +11,15 @@ import React, {useEffect, useState} from 'react';
 import {COLORS, ICONS, SIZES, FONTS} from '../../resources';
 import HomeHeader from '../../components/HomeHeader';
 import SelectCityModal from '../../components/SelectCityModal';
+import DatePicker from 'react-native-date-picker';
 
 const HomeScreen = ({navigation}: any) => {
   const [flightType, setFlightType] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
+  const [dateModalVisible, setDateModalVisible] = useState(false);
+  const [dateOne, setDateOne] = useState('');
+  const [dateTwo, setDateTwo] = useState('');
+  const [TravellDate, setTravellDate] = useState(true);
   const [origin, setOrigin] = useState('');
   const [destination, setDestination] = useState('');
   const [currentSelected, setCurrentSelected] = useState<
@@ -111,15 +116,30 @@ const HomeScreen = ({navigation}: any) => {
             <View style={{flexDirection: 'row', paddingHorizontal: '7%'}}>
               <View style={{flex: 1}}>
                 <Text style={styles.descText}>Travel Date</Text>
-                <Text style={styles.selectCityTxt}>Select Date</Text>
+                <TouchableOpacity
+                  onPress={() => {
+                    setTravellDate(true);
+                    setDateModalVisible(true);
+                  }}>
+                  <Text style={styles.selectCityTxt}>
+                    {dateOne ? dateOne + '' : 'Select Date'}
+                  </Text>
+                </TouchableOpacity>
               </View>
               <View style={{flex: 1}}>
                 <Text style={{...styles.descText, alignSelf: 'flex-end'}}>
                   Return Date
                 </Text>
-                <Text style={{...styles.selectCityTxt, alignSelf: 'flex-end'}}>
-                  Select Date
-                </Text>
+                <TouchableOpacity
+                  onPress={() => {
+                    setTravellDate(false);
+                    setDateModalVisible(true);
+                  }}>
+                  <Text
+                    style={{alignSelf: 'flex-end', ...styles.selectCityTxt}}>
+                    {dateTwo ? dateTwo + '' : 'Select Date'}
+                  </Text>
+                </TouchableOpacity>
               </View>
             </View>
             <View
@@ -189,6 +209,24 @@ const HomeScreen = ({navigation}: any) => {
           <Text style={styles.appText}>Seach Flight</Text>
         </TouchableOpacity>
       </ScrollView>
+      <DatePicker
+        modal
+        open={dateModalVisible}
+        date={new Date()}
+        mode="date"
+        onConfirm={date => {
+          if (TravellDate) {
+            setDateOne(date.toLocaleDateString());
+          } else {
+            setDateTwo(date.toLocaleDateString());
+          }
+          setDateModalVisible(false);
+          // setDate(date)
+        }}
+        onCancel={() => {
+          setDateModalVisible(false);
+        }}
+      />
       <SelectCityModal
         visible={modalVisible}
         onClose={() => {
